@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#chat_form').on('submit', function (event) {
+                event.preventDefault();
+                var userMessage = $('#user_input').val();
+                $('#user_input').val(''); // Limpa o campo de input após o envio
+                if (userMessage.trim() !== '') {
+                    addUserMessage(userMessage);
+                    sendMessage(userMessage);
+                }
+            });
+
+            // Função que adiciona a mensagem do usuário
+            function addUserMessage(message) {
+                var userMessageBlock = `
+                    <div class="user">
+                        <div class="user__name">
+                            <p>Você:</p>
+                        </div>
+                        <p class="user__response">${message}</p>
+                    </div>`;
+                $('.chat__container').append(userMessageBlock);
+                scrollToBottom();
+            }
+
+            // Função que adiciona a mensagem do bot
+            function addBotMessage(message) {
+                var botMessageBlock = `
+                    <div class="bot">
+                        <div class="bot__container">
+                            <img src="{{ url_for('static', filename='images/file.png') }}" alt="" class="bot__img">
+                            <div class="bot__response">
+                                <div class="bot__name">
+                                    <p>LeviChatv1.0:</p>
+                                </div>
+                                <p class="bot__name__response">${message}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                $('.chat__container').append(botMessageBlock);
+                scrollToBottom();
+            }
+
+            // Função que envia a mensagem e manipula a resposta do bot
+            function sendMessage(message) {
+                addBotMessage('Bot is typing...');
+                $.ajax({
+                    type: 'POST',
+                    url: '/chat',
+                    data: { user_input: message },
+                    success: function (response) {
+                        $('.bot__name__response').last().text(response.response); // Atualiza a última resposta
+                        scrollToBottom();
+                    },
+                    error: function () {
+                        $('.bot__name__response').last().text('Sorry, something went wrong.');
+                        scrollToBottom();
+                    }
+                });
+            }
+
+            // Função para manter o scroll no fim do chat
+            function scrollToBottom() {
+                $('.chat__container').animate({ scrollTop: $('.chat__container')[0].scrollHeight }, 'slow');
+            }
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo_ufcg.png') }}"/>
+        <h1>Processamento de Linguagem Natural</h1>
+    </header>
+    
+    <section>
+        <article class="chat">
+            <div class="chat__container">
+
+            </div>
+        </article>
+        <form id="chat_form" class="query__container" method="post">
+            <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música...">
+            <button type="submit">Send</button>
+        </form>
+    </section>
+</body>
+</html>
