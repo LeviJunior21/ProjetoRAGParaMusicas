@@ -2,8 +2,10 @@ from langchain_community.vectorstores import FAISS
 #from langchain_community.llms.huggingface_hub import HuggingFaceHub
 #from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.llms.ollama import Ollama
+#from langchain_community.llms.ollama import Ollama
 from langchain_huggingface import HuggingFaceEndpoint
+from langchain.schema import Document
+from vectordb import Memory
 import torch, pickle, os
 import pandas as pd
 
@@ -76,8 +78,7 @@ def make_db():
     save_faiss(db)
     return db
 
-def chat(msg):
-    db = load_faiss()
+def chat_faiss(msg, db):
     retriever = db.as_retriever()
     docs = retriever.invoke(msg)
 
@@ -93,6 +94,9 @@ def chat(msg):
 
     Answer: 
     """'''
+    #prompt = template.format(context=context, question=msg)
+    #return model.invoke(prompt)
+
     #llm = Ollama(model="llama3.1")
     #prompt = f"Baseado no seguinte contexto de letras:\n{context}\n\nEscolha uma música e explique sua escolha de forma polida."
     #response = llm(prompt)
@@ -100,11 +104,56 @@ def chat(msg):
 
     prompt = f"{context}\n\nQuestion: Qual dessas músicas corresponde a '{msg}'? Fale sobre a música escolhida, não precisa informar qual ordem da música escolhida, só informe qual a música e a explicação.\n\Resposta: "
     return model.invoke(prompt)
-    #prompt = template.format(context=context, question=msg)
-    #return model.invoke(prompt)
 
+def load_vectordb(path):
+  return Memory(chunking_strategy={"mode": "sliding_window", "window_size": 14, "overlap": 10}, memory_file=path)
+
+def save_vectordb(memory, sections):
+  for i in range(0, len(sections)):
+    letra = sections[i].page_content
+
+    metadata = {
+      "author": sections[i].metadata["author"],
+      "tittle": sections[i].metadata["tittle"],
+      "lyrics": sections[i].metadata["lyrics"]
+    }
+
+    memory.save(letra, metadata, memory_file="./mem.pkl")
+
+def create_sections(path):
+  dataframe = pd.read_csv(path)
+  sections = [
+      Document(
+          page_content = row["lyrics"],
+          metadata = {
+              "author": row["author"],
+              "tittle": row["music"],
+              "lyrics": row["lyrics"]
+          }
+      )
+      for index, row in dataframe.iterrows()
+  ]
+  return sections
+
+def chat_vectordb(msg, mem):
+   top_songs = mem.search(msg, top_n=4)
+   seen = set()
+   context = []
+   for song in top_songs:
+      artist = song['metadata']['author']
+      tittle = song['metadata']['tittle']
+      unique_key = (artist, tittle)
+      if unique_key not in seen:
+         seen.add(unique_key)
+         context.append(f"Artist: {artist}, Song Name: {tittle}, Lyrics: {song['metadata']['lyrics']}")
+   # Converte a lista de context para uma string
+   context = "\n\n".join(context)
+   prompt = f"{context}\n\nQuestion: Qual dessas músicas corresponde a '{msg}'? Fale sobre a música escolhida, não precisa informar qual ordem da música escolhida, só informe qual a música e a explicação.\n\Resposta: "
+   return model.invoke(prompt)
+
+#db = load_faiss()
 #lyric = "So I'ma love you every night like it's the last night"
 #lyric = "amiga minha namorada"
 #lyric = "For the way I hurt"
-lyric = "frozen inside without your"
-print(chat(lyric))
+#lyric = "frozen inside without your"
+#print(chat_faiss(lyric))

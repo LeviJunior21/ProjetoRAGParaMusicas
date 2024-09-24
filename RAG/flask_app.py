@@ -6,6 +6,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 app = Flask(__name__)
 
+# Carregar o DB quando o aplicativo é iniciado
+#db = m.load_faiss()
+#save_vectordb(create_sections("../WebScrapingLyrics/top_musicas.csv"))
+mem = m.load_vectordb("./mem.pkl")
+
 @app.route('/')
 def home():
     # Renderiza a página HTML onde o chatbot será exibido
@@ -17,7 +22,8 @@ def chat():
     user_message = request.form['user_input']
     
     # Gera a resposta usando a função 'chat'
-    bot_message = m.chat(user_message)
+    #bot_message = m.chat_faiss(user_message, db)
+    bot_message = m.chat_vectordb(user_message, mem)
     
     # Define o padrão regex para extrair a resposta do modelo, se necessário
     '''pattern = r"Answer:\s*(.*)"
