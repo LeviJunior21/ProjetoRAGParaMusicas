@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLN</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <!--<link rel="stylesheet" href="../static/css/index.css">-->
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -69,7 +71,7 @@
 
             // Função para manter o scroll no fim do chat
             function scrollToBottom() {
-                $('.chat__container').animate({ scrollTop: $('.chat__container')[0].scrollHeight }, 'slow');
+                $('.chat').animate({ scrollTop: $('.chat')[0].scrollHeight }, 200);
             }
         });
     </script>
@@ -87,8 +89,12 @@
             </div>
         </article>
         <form id="chat_form" class="query__container" method="post">
-            <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música...">
-            <button type="submit">Send</button>
+            <div class="input_container">
+                <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música...">
+                <button class="send" type="submit">
+                    <img src="{{ url_for('static', filename='images/arrow_icon.png') }}"/>
+                </button>
+            </div>
         </form>
     </section>
 </body>
