@@ -9,7 +9,7 @@ from vectordb import Memory
 import torch, pickle, os
 import pandas as pd
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
 HF_API_TOKEN = "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"
 
@@ -140,12 +140,12 @@ def chat_vectordb(msg, mem):
    seen = set()
    context = []
    for song in top_songs:
-      artist = song['metadata']['author']
-      tittle = song['metadata']['tittle']
+      artist = song['metadata']['autor']
+      tittle = song['metadata']['musica']
       unique_key = (artist, tittle)
       if unique_key not in seen:
          seen.add(unique_key)
-         context.append(f"Artist: {artist}, Song Name: {tittle}, Lyrics: {song['metadata']['lyrics']}")
+         context.append(f"Artist: {artist}, Song Name: {tittle}, Lyrics: {song['metadata']['letra']}")
    # Converte a lista de context para uma string
    context = "\n\n".join(context)
    prompt = f"{context}\n\nQuestion: Qual dessas músicas corresponde a '{msg}'? Fale sobre a música escolhida, não precisa informar qual ordem da música escolhida, só informe qual a música e a explicação.\n\Resposta: "

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLN</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="../static/css/index.css">
     <!--<link rel="stylesheet" href="../static/css/index.css">-->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -74,11 +74,85 @@
                 $('.chat').animate({ scrollTop: $('.chat')[0].scrollHeight }, 200);
             }
         });
+
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Função para iniciar ou parar a gravação
+        function changeImage(button) {
+            console.log("Ok");
+            const img = button.querySelector('img');
+            const inputQuery = document.getElementsByClassName('query')[0]; // Acessando o primeiro elemento com a classe 'query'
+
+            if (img.src.includes('record.png')) {
+                img.src = '../static/images/recording.png'; 
+                inputQuery.disabled = true;
+                inputQuery.style.backgroundColor = "white";
+                startRecording(); // Iniciar gravação
+            } else {
+                img.src = '../static/images/record.png'; 
+                inputQuery.disabled = false; 
+                stopRecording(); // Parar gravação
+            }
+        }
+
+        // Função para iniciar a gravação de áudio
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+                console.log("Gravação iniciada");
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play(); 
+                    audioChunks = []; 
+                };
+            });
+        }
+
+        // Função para parar a gravação de áudio
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                console.log("Gravação parada");
+        
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioChunks = []; // Limpa o array para a próxima gravação
+        
+                    // Enviar o áudio para o servidor Flask
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'recording.wav'); // Nome do arquivo
+        
+                    fetch("http://127.0.0.1:5000/voice-to-text", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Transcrição recebida:", data.transcription);
+                    })
+                    .catch(error => {
+                        console.error("Erro ao enviar o áudio:", error);
+                    });
+                };
+            }
+        }
+        
     </script>
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='images/logo_ufcg.png') }}"/>
+        <img src="./static/images/logo_ufcg.png"/>
         <h1>Processamento de Linguagem Natural</h1>
     </header>
     
@@ -90,9 +164,12 @@
         </article>
         <form id="chat_form" class="query__container" method="post">
             <div class="input_container">
-                <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música...">
+                <button class="record" onClick="changeImage(this)">
+                    <img src="../static/images/record.png" id="recordImage"/>
+                </button>
+                <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música..."/>
                 <button class="send" type="submit">
-                    <img src="{{ url_for('static', filename='images/arrow_icon.png') }}"/>
+                    <img src="../static/images/arrow_icon.png"/>
                 </button>
             </div>
         </form>

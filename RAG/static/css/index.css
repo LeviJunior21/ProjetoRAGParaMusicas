@@ -82,8 +82,8 @@ section {
     width: calc(100% - 60px);
     padding: 0px 15px;
     height: 40px;
-    border-radius: 20px 0px 0px 20px;
     border: 0;
+    padding: 1px;
 }
 
 .query:focus {
@@ -202,6 +202,13 @@ section {
     cursor: pointer;
 }
 
+.record {
+    border-radius: 20px 0px 0px 20px;
+    background-color: white;
+    border: 10px;
+    cursor: pointer;
+}
+
 .send img {
     width: 33px;
     height: 33px;
@@ -212,6 +219,19 @@ section {
     margin-right: -2px;
 }
 
+.record img {
+    width: 33px;
+    height: 33px;
+    background-color: #a6d1e9;
+    border-radius: 25px;
+    margin-top: 2px;
+    margin-right: -2px;
+}
+
 .send img:hover {
+    background-color: #30ABED;
+}
+
+.record img:hover {
     background-color: #30ABED;
 }
