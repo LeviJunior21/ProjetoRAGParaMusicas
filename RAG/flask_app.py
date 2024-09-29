@@ -1,17 +1,15 @@
-import re, torch
+#import torch
 from flask import Flask, request, render_template, jsonify
 import main as m
 import speech_recognition as sr
 from pydub import AudioSegment
 from io import BytesIO
 
-device = torch.device("cpu")
-
 app = Flask(__name__)
 
 # Carregar o DB quando o aplicativo é iniciado
-#db = m.load_faiss()
-mem = m.load_vectordb("./save.pkl")
+#db = m.load_faiss() # No FAISS, caso não exista, ele tenta criar outro e salva
+mem = m.load_vectordb("./save.pkl") # No VectorDB, caso não exista, é preciso criar manualmente e fornecer o caminho do arquivo
 
 @app.route('/')
 def home():

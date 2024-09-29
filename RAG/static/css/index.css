@@ -79,10 +79,11 @@ section {
 }
 
 .query {
-    width: calc(100% - 60px);
+    width: calc(100% - 30px);
     padding: 0px 15px;
     height: 40px;
     border: 0;
+    border-radius: 0px 0px 0px 0px;
     padding: 1px;
 }
 
@@ -213,6 +214,9 @@ section {
     background-color: white;
     border: 10px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .send img {
@@ -226,12 +230,12 @@ section {
 }
 
 .record img {
-    width: 33px;
+    width: 33x;
     height: 33px;
     background-color: #a6d1e9;
     border-radius: 25px;
-    margin-top: 2px;
     margin-right: -2px;
+    padding: 2px;
 }
 
 .send img:hover {
@@ -240,4 +244,29 @@ section {
 
 .record img:hover {
     background-color: #30ABED;
+}
+
+.bot_options {
+    width: 100%;
+    height: 30px;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.bot_options button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.bot_options button img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }

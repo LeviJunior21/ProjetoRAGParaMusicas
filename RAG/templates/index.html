@@ -45,6 +45,17 @@
                                 <p>LeviChatv1.0:</p>
                             </div>
                             <p class="bot__name__response">${message}</p>
+                            <div class="bot_options">
+                                <button>
+                                    <img src="../static/images/copy.png" onClick=""/>
+                                </button>
+                                <button>
+                                    <img src="../static/images/audio.png" onClick="speak(${message})"/>
+                                </button>
+                                <button>
+                                    <img src="../static/images/reloading.png" onClick=""/>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>`;
@@ -61,7 +72,6 @@
                 data: { user_input: message },
                 success: function (response) {
                     $('.bot__name__response').last().text(response.response); // Atualiza a última resposta
-                    speak(response.response)
                     scrollToBottom();
                 },
                 error: function () {
@@ -79,24 +89,6 @@
         let isRecording = false;
         let mediaRecorder;
         let audioChunks = [];
-
-        // Função para iniciar ou parar a gravação
-        function changeImage(button) {
-            console.log("Ok");
-            const img = button.querySelector('img');
-            const inputQuery = document.getElementsByClassName('query')[0]; // Acessando o primeiro elemento com a classe 'query'
-
-            if (img.src.includes('record.png')) {
-                img.src = '../static/images/recording.png'; 
-                inputQuery.disabled = true;
-                inputQuery.style.backgroundColor = "white";
-                startRecording(); // Iniciar gravação
-            } else {
-                img.src = '../static/images/record.png'; 
-                inputQuery.disabled = false; 
-                stopRecording(); // Parar gravação
-            }
-        }
 
         // Função para iniciar a gravação de áudio
         function startRecording() {
@@ -155,6 +147,7 @@
             }
         }
 
+        // Função para ler texto
         function speak(msg) {
             const utterance = new SpeechSynthesisUtterance(msg);
             utterance.lang = 'pt-BR';
@@ -167,6 +160,26 @@
             speechSynthesis.speak(utterance);
         }
         
+        function changeImage(button) {
+            console.log("Ok");
+            const img = button.querySelector('img');
+            const inputQuery = document.getElementsByClassName('query')[0]; // Acessando o primeiro elemento com a classe 'query'
+
+            if (img.src.includes('microphone.png')) {
+                img.src = '../static/images/audio.png'; 
+                img.style.backgroundColor = "#30ABED";
+                inputQuery.disabled = true;
+                
+                inputQuery.style.backgroundColor = "white";
+                startRecording(); // Iniciar gravação
+            } else {
+                img.src = '../static/images/microphone.png'; 
+                img.style.backgroundColor = "#a6d1e9";
+                inputQuery.disabled = false; 
+                stopRecording(); // Parar gravação
+            }
+        }
+
     </script>
 </head>
 <body>
@@ -183,14 +196,14 @@
         </article>
         <form id="chat_form" class="query__container" method="post">
             <div class="input_container">
-                <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música..."/>
+                <button class="record" onClick="changeImage(this)">
+                    <img src="../static/images/microphone.png" id="recordImage"/>
+                </button>
+                <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunte a música..."/>
                 <button class="send" type="submit">
                     <img src="../static/images/arrow_icon.png"/>
                 </button>
             </div>
-            <button class="record" onClick="changeImage(this)">
-                <img src="../static/images/record.png" id="recordImage"/>
-            </button>
         </form>
     </section>
 </body>
