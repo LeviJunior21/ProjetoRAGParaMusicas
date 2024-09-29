@@ -95,7 +95,7 @@ def save_vectordb(memory, sections):
       "lyrics": sections[i].metadata["lyrics"]
     }
 
-    memory.save(letra, metadata, memory_file="./mem.pkl")
+    memory.save(letra, metadata, memory_file="./save.pkl")
 
 def create_sections(path):
   dataframe = pd.read_csv(path)
@@ -117,12 +117,12 @@ def chat_vectordb(msg, mem):
    seen = set()
    context = []
    for song in top_songs:
-      artist = song['metadata']['author']
-      tittle = song['metadata']['tittle']
+      artist = song['metadata']['autor']
+      tittle = song['metadata']['musica']
       unique_key = (artist, tittle)
       if unique_key not in seen:
          seen.add(unique_key)
-         lyrics = song['metadata']['lyrics'][:3000]
+         lyrics = song['metadata']['letra'][:3000]
          context.append(f"Artist: {artist}, Song Name: {tittle}, Lyrics: {lyrics}")
    # Converte a lista de context para uma string
    context = "\n\n".join(context)

@@ -131,6 +131,12 @@ section {
     width: 60%;
 }
 
+@media (max-width: 800px) {
+    .bot {
+        width: 100%;
+    }
+}
+
 .bot__container {
     width: 100%;
     display: flex;

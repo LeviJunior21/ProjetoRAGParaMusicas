@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # Carregar o DB quando o aplicativo é iniciado
 #db = m.load_faiss()
-mem = m.load_vectordb("./mem1.pkl")
+mem = m.load_vectordb("./save.pkl")
 
 @app.route('/')
 def home():
