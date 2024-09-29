@@ -3,12 +3,10 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain.schema import Document
 from vectordb import Memory
-import torch, pickle, os
+import pickle, os
 import pandas as pd
 
-device = torch.device("cpu")
-
-HF_API_TOKEN = "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"
+HF_API_TOKEN = "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" # token do HuggingFace
 
 model = HuggingFaceEndpoint(
     repo_id="HuggingFaceH4/zephyr-7b-beta",
@@ -85,7 +83,7 @@ def chat_faiss(msg, db):
 def load_vectordb(path):
   return Memory(chunking_strategy={"mode": "sliding_window", "window_size": 14, "overlap": 10}, memory_file=path)
 
-def save_vectordb(memory, sections):
+def save_vectordb(memory, sections, file_name):
   for i in range(0, len(sections)):
     letra = sections[i].page_content
 
@@ -95,7 +93,7 @@ def save_vectordb(memory, sections):
       "lyrics": sections[i].metadata["lyrics"]
     }
 
-    memory.save(letra, metadata, memory_file="./mem.pkl")
+    memory.save(letra, metadata, memory_file=file_name)
 
 def create_sections(path):
   dataframe = pd.read_csv(path)
@@ -128,13 +126,6 @@ def chat_vectordb(msg, mem):
    context = "\n\n".join(context)
    prompt = f"{context}\n\nQuestion: Qual dessas músicas corresponde a '{msg}'? Fale sobre a música escolhida, não precisa informar qual ordem da música escolhida, só informe qual a música e a explicação.\n\Resposta: "
    return model.invoke(prompt)
-
-#db = load_faiss()
-#lyric = "So I'ma love you every night like it's the last night"
-#lyric = "amiga minha namorada"
-#lyric = "For the way I hurt"
-#lyric = "frozen inside without your"
-#print(chat_faiss(lyric))
 
 #mem = Memory(chunking_strategy={"mode": "sliding_window", "window_size": 14, "overlap": 10})
 #save_vectordb(mem, create_sections("../WebScrapingLyrics/song_lyrics.csv"), "./mem1.pkl")

@@ -1,17 +1,15 @@
-import re, torch
+#import torch
 from flask import Flask, request, render_template, jsonify
 import main as m
 import speech_recognition as sr
 from pydub import AudioSegment
 from io import BytesIO
 
-device = torch.device("cpu")
-
 app = Flask(__name__)
 
 # Carregar o DB quando o aplicativo é iniciado
-#db = m.load_faiss()
-mem = m.load_vectordb("./mem1.pkl")
+#db = m.load_faiss() # No FAISS, caso não exista, ele tenta criar outro e salva
+mem = m.load_vectordb("./mem1.pkl") # No VectorDB, caso não exista, é preciso criar manualmente e fornecer o caminho do arquivo
 
 @app.route('/')
 def home():
@@ -57,4 +55,4 @@ def voice_to_text():
         return jsonify({"error": f"Erro ao tentar usar o serviço de reconhecimento de fala: {e}"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run()
