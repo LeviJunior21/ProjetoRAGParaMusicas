@@ -21,6 +21,19 @@
             });
         });
 
+        // Função para ler texto
+        function speak(msg) {
+            const utterance = new SpeechSynthesisUtterance(msg);
+            utterance.lang = 'pt-BR';
+            utterance.pitch = 1;
+            utterance.rate = 1;
+            
+            const voices = speechSynthesis.getVoices();
+            utterance.voice = voices[1]; // Escolher voz
+
+            speechSynthesis.speak(utterance);
+        }
+
         // Função que adiciona a mensagem do usuário
         function addUserMessage(message) {
             var userMessageBlock = `
@@ -47,13 +60,7 @@
                             <p class="bot__name__response">${message}</p>
                             <div class="bot_options">
                                 <button>
-                                    <img src="../static/images/copy.png" onClick=""/>
-                                </button>
-                                <button>
-                                    <img src="../static/images/audio.png" onClick="speak(${message})"/>
-                                </button>
-                                <button>
-                                    <img src="../static/images/reloading.png" onClick=""/>
+                                    <img src="../static/images/audio.png" onClick="speak("Oi")"/>
                                 </button>
                             </div>
                         </div>
@@ -72,6 +79,7 @@
                 data: { user_input: message },
                 success: function (response) {
                     $('.bot__name__response').last().text(response.response); // Atualiza a última resposta
+                    speak(response.response)
                     scrollToBottom();
                 },
                 error: function () {
@@ -146,19 +154,6 @@
                 };
             }
         }
-
-        // Função para ler texto
-        function speak(msg) {
-            const utterance = new SpeechSynthesisUtterance(msg);
-            utterance.lang = 'pt-BR';
-            utterance.pitch = 1;
-            utterance.rate = 1;
-            
-            const voices = speechSynthesis.getVoices();
-            utterance.voice = voices[1]; // Escolher voz
-
-            speechSynthesis.speak(utterance);
-        }
         
         function changeImage(button) {
             console.log("Ok");
@@ -194,16 +189,17 @@
 
             </div>
         </article>
+
         <form id="chat_form" class="query__container" method="post">
             <div class="input_container">
-                <button class="record" onClick="changeImage(this)">
-                    <img src="../static/images/microphone.png" id="recordImage"/>
-                </button>
                 <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunte a música..."/>
                 <button class="send" type="submit">
                     <img src="../static/images/arrow_icon.png"/>
                 </button>
             </div>
+            <button class="record" onClick="changeImage(this)">
+                <img src="../static/images/microphone.png" id="recordImage"/>
+            </button>
         </form>
     </section>
 </body>

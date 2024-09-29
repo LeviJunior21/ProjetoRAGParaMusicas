@@ -73,9 +73,12 @@ section {
 .query__container {
     grid-area: query;
     width: 100%;
-    height: 60px;
+    height: 50px;
     display: flex;
     align-items: center;
+    border: 4px solid #30ABED;
+    flex-direction: row-reverse;
+    border-radius: 30px;
 }
 
 .query {
@@ -199,7 +202,6 @@ section {
     justify-content: space-between;
     border-radius: 40px;
     padding: 5px;
-    background-color: #30ABED;
 }
 
 .send {
