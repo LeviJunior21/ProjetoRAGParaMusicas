@@ -1,5 +1,6 @@
 Jinja2
 jinja2-time
+flask
 pep8==1.7.1
 python-dateutil
 python-docx==0.8.11

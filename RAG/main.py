@@ -1,8 +1,5 @@
 from langchain_community.vectorstores import FAISS
-#from langchain_community.llms.huggingface_hub import HuggingFaceHub
-#from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
-#from langchain_community.llms.ollama import Ollama
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain.schema import Document
 from vectordb import Memory
@@ -12,18 +9,6 @@ import pandas as pd
 device = torch.device("cpu")
 
 HF_API_TOKEN = "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"
-
-'''model = HuggingFaceHub(
-    repo_id="HuggingFaceH4/zephyr-7b-beta",
-    task="text-generation",
-    model_kwargs={
-        "max_new_tokens": 512,
-        "top_k": 30,
-        "temperature": 0.1,
-        "repetition_penalty": 1.03,
-    },
-    huggingfacehub_api_token=HF_API_TOKEN,
-)'''
 
 model = HuggingFaceEndpoint(
     repo_id="HuggingFaceH4/zephyr-7b-beta",
@@ -94,14 +79,6 @@ def chat_faiss(msg, db):
 
     Answer: 
     """'''
-    #prompt = template.format(context=context, question=msg)
-    #return model.invoke(prompt)
-
-    #llm = Ollama(model="llama3.1")
-    #prompt = f"Baseado no seguinte contexto de letras:\n{context}\n\nEscolha uma música e explique sua escolha de forma polida."
-    #response = llm(prompt)
-    #return f"Resposta: {response}"
-
     prompt = f"{context}\n\nQuestion: Qual dessas músicas corresponde a '{msg}'? Fale sobre a música escolhida, não precisa informar qual ordem da música escolhida, só informe qual a música e a explicação.\n\Resposta: "
     return model.invoke(prompt)
 
@@ -140,12 +117,13 @@ def chat_vectordb(msg, mem):
    seen = set()
    context = []
    for song in top_songs:
-      artist = song['metadata']['autor']
-      tittle = song['metadata']['musica']
+      artist = song['metadata']['author']
+      tittle = song['metadata']['tittle']
       unique_key = (artist, tittle)
       if unique_key not in seen:
          seen.add(unique_key)
-         context.append(f"Artist: {artist}, Song Name: {tittle}, Lyrics: {song['metadata']['letra']}")
+         lyrics = song['metadata']['lyrics'][:3000]
+         context.append(f"Artist: {artist}, Song Name: {tittle}, Lyrics: {lyrics}")
    # Converte a lista de context para uma string
    context = "\n\n".join(context)
    prompt = f"{context}\n\nQuestion: Qual dessas músicas corresponde a '{msg}'? Fale sobre a música escolhida, não precisa informar qual ordem da música escolhida, só informe qual a música e a explicação.\n\Resposta: "
@@ -157,3 +135,6 @@ def chat_vectordb(msg, mem):
 #lyric = "For the way I hurt"
 #lyric = "frozen inside without your"
 #print(chat_faiss(lyric))
+
+#mem = Memory(chunking_strategy={"mode": "sliding_window", "window_size": 14, "overlap": 10})
+#save_vectordb(mem, create_sections("../WebScrapingLyrics/song_lyrics.csv"), "./mem1.pkl")

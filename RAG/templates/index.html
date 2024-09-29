@@ -19,61 +19,62 @@
                     sendMessage(userMessage);
                 }
             });
-
-            // Função que adiciona a mensagem do usuário
-            function addUserMessage(message) {
-                var userMessageBlock = `
-                    <div class="user">
-                        <div class="user__name">
-                            <p>Você:</p>
-                        </div>
-                        <p class="user__response">${message}</p>
-                    </div>`;
-                $('.chat__container').append(userMessageBlock);
-                scrollToBottom();
-            }
-
-            // Função que adiciona a mensagem do bot
-            function addBotMessage(message) {
-                var botMessageBlock = `
-                    <div class="bot">
-                        <div class="bot__container">
-                            <img src="{{ url_for('static', filename='images/file.png') }}" alt="" class="bot__img">
-                            <div class="bot__response">
-                                <div class="bot__name">
-                                    <p>LeviChatv1.0:</p>
-                                </div>
-                                <p class="bot__name__response">${message}</p>
-                            </div>
-                        </div>
-                    </div>`;
-                $('.chat__container').append(botMessageBlock);
-                scrollToBottom();
-            }
-
-            // Função que envia a mensagem e manipula a resposta do bot
-            function sendMessage(message) {
-                addBotMessage('Bot is typing...');
-                $.ajax({
-                    type: 'POST',
-                    url: '/chat',
-                    data: { user_input: message },
-                    success: function (response) {
-                        $('.bot__name__response').last().text(response.response); // Atualiza a última resposta
-                        scrollToBottom();
-                    },
-                    error: function () {
-                        $('.bot__name__response').last().text('Sorry, something went wrong.');
-                        scrollToBottom();
-                    }
-                });
-            }
-
-            // Função para manter o scroll no fim do chat
-            function scrollToBottom() {
-                $('.chat').animate({ scrollTop: $('.chat')[0].scrollHeight }, 200);
-            }
         });
+
+        // Função que adiciona a mensagem do usuário
+        function addUserMessage(message) {
+            var userMessageBlock = `
+                <div class="user">
+                    <div class="user__name">
+                        <p>Você:</p>
+                    </div>
+                    <p class="user__response">${message}</p>
+                </div>`;
+            $('.chat__container').append(userMessageBlock);
+            scrollToBottom();
+        }
+
+        // Função que adiciona a mensagem do bot
+        function addBotMessage(message) {
+            var botMessageBlock = `
+                <div class="bot">
+                    <div class="bot__container">
+                        <img src="{{ url_for('static', filename='images/file.png') }}" alt="" class="bot__img">
+                        <div class="bot__response">
+                            <div class="bot__name">
+                                <p>LeviChatv1.0:</p>
+                            </div>
+                            <p class="bot__name__response">${message}</p>
+                        </div>
+                    </div>
+                </div>`;
+            $('.chat__container').append(botMessageBlock);
+            scrollToBottom();
+        }
+
+        // Função que envia a mensagem e manipula a resposta do bot
+        function sendMessage(message) {
+            addBotMessage('Bot is typing...');
+            $.ajax({
+                type: 'POST',
+                url: '/chat',
+                data: { user_input: message },
+                success: function (response) {
+                    $('.bot__name__response').last().text(response.response); // Atualiza a última resposta
+                    speak(response.response)
+                    scrollToBottom();
+                },
+                error: function () {
+                    $('.bot__name__response').last().text('Sorry, something went wrong.');
+                    scrollToBottom();
+                }
+            });
+        }
+
+        // Função para manter o scroll no fim do chat
+        function scrollToBottom() {
+            $('.chat').animate({ scrollTop: $('.chat')[0].scrollHeight }, 200);
+        }
 
         let isRecording = false;
         let mediaRecorder;
@@ -132,20 +133,38 @@
                     // Enviar o áudio para o servidor Flask
                     const formData = new FormData();
                     formData.append('file', audioBlob, 'recording.wav'); // Nome do arquivo
-        
-                    fetch("http://127.0.0.1:5000/voice-to-text", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Transcrição recebida:", data.transcription);
-                    })
-                    .catch(error => {
-                        console.error("Erro ao enviar o áudio:", error);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/voice-to-text',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            const transcription = data.transcription;
+                            if (transcription) {
+                                addUserMessage(transcription);
+                                sendMessage(transcription);
+                            }
+                        },
+                        error: function () {
+                            console.error("Erro ao enviar o áudio:", error);
+                        }
                     });
                 };
             }
+        }
+
+        function speak(msg) {
+            const utterance = new SpeechSynthesisUtterance(msg);
+            utterance.lang = 'pt-BR';
+            utterance.pitch = 1;
+            utterance.rate = 1;
+            
+            const voices = speechSynthesis.getVoices();
+            utterance.voice = voices[1]; // Escolher voz
+
+            speechSynthesis.speak(utterance);
         }
         
     </script>
@@ -164,14 +183,14 @@
         </article>
         <form id="chat_form" class="query__container" method="post">
             <div class="input_container">
-                <button class="record" onClick="changeImage(this)">
-                    <img src="../static/images/record.png" id="recordImage"/>
-                </button>
                 <input type="text" id="user_input" class="query" autocomplete="off" placeholder="Pergunta a música..."/>
                 <button class="send" type="submit">
                     <img src="../static/images/arrow_icon.png"/>
                 </button>
             </div>
+            <button class="record" onClick="changeImage(this)">
+                <img src="../static/images/record.png" id="recordImage"/>
+            </button>
         </form>
     </section>
 </body>

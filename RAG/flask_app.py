@@ -1,16 +1,17 @@
 import re, torch
 from flask import Flask, request, render_template, jsonify
 import main as m
-from openai import OpenAI
-client = OpenAI(api_key="sk-eGvZCSqrDCHZ67Q5K07q7ELmVRcHcS2vpwNhVPh_R-T3BlbkFJ0Iarg9b4HudzgrBhdahfXNWhSNuvXaRjrfcd_sCU0A")
+import speech_recognition as sr
+from pydub import AudioSegment
+from io import BytesIO
+
 device = torch.device("cpu")
 
 app = Flask(__name__)
 
 # Carregar o DB quando o aplicativo é iniciado
 #db = m.load_faiss()
-#save_vectordb(create_sections("../WebScrapingLyrics/top_musicas.csv"))
-mem = m.load_vectordb("./save.pkl")
+mem = m.load_vectordb("./mem1.pkl")
 
 @app.route('/')
 def home():
@@ -25,18 +26,6 @@ def chat():
     # Gera a resposta usando a função 'chat'
     #bot_message = m.chat_faiss(user_message, db)
     bot_message = m.chat_vectordb(user_message, mem)
-    
-    # Define o padrão regex para extrair a resposta do modelo, se necessário
-    '''pattern = r"Answer:\s*(.*)"
-    match = re.search(pattern, bot_message, re.DOTALL)
-
-    if match:
-        answer = match.group(1).strip()
-        print("Extracted Answer:", answer)
-        return {'response': answer}
-    else:
-        print("Answer not found")
-        return {'response': "Answer not found as per context"}'''
     print("Extracted Answer:", bot_message)
     return {'response': bot_message}
 
@@ -49,16 +38,23 @@ def voice_to_text():
 
     if audio_file.filename == '':
         return jsonify({"error": "No selected file"}), 400
+    
+    audio_seg = AudioSegment.from_file(audio_file)
+    wav_io = BytesIO()
+    audio_seg.export(wav_io, format='wav')
+    wav_io.seek(0)
 
+    r = sr.Recognizer()
+    with sr.AudioFile(wav_io) as source:
+        audio_dt = r.record(source)
     try:
-        translation = openai.Audio.transcriptions.create(
-            model="whisper-1", 
-            file=audio_file,
-            response_format="text"
-        )
-        return jsonify({"transcription": translation.text}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        txt = r.recognize_google(audio_dt, language="pt-BR")
+        print(f"Transcrição: {txt}")
+        return jsonify({"transcription": txt}), 200
+    except sr.UnknownValueError:
+        return jsonify({"error": "Não foi possível entender o áudio"}), 400
+    except sr.RequestError as e:
+        return jsonify({"error": f"Erro ao tentar usar o serviço de reconhecimento de fala: {e}"}), 500
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
