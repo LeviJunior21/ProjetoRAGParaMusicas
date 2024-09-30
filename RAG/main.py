@@ -93,6 +93,8 @@ def save_vectordb(memory, sections, file_name):
       "lyrics": sections[i].metadata["lyrics"]
     }
 
+    memory.save(letra, metadata, memory_file=file_name)
+
 def create_sections(path):
   dataframe = pd.read_csv(path)
   sections = [

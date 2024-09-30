@@ -15,6 +15,12 @@ Execute para instalar as dependências listadas no arquivo `requirements.txt` ca
 pip install -r requirements.txt
 ```
 
+Caso queira utilizar a base de embeddings (do vectordb) já gerada no projeto, faça o download do arquivo `.pkl` através do seguinte link:
+
+[Download Base de Embeddings](https://drive.google.com/file/d/14GTpt9tGmAMHc8bpKxqetw6aL8sFu-iY/view)
+
+Adicione o arquivo baixado no diretório raiz do projeto, onde o `./RAG/main.py` o encontrará e carregará para uso.
+
 Adicionalmente, é preciso ter o `ffmpeg` instalado para processamento de áudio:
 
 ```bash
