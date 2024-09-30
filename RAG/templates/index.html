@@ -21,17 +21,26 @@
             });
         });
 
+        let synth = window.speechSynthesis;
+        let isSpeaking = false;
+
         // Função para ler texto
         function speak(msg) {
-            const utterance = new SpeechSynthesisUtterance(msg);
-            utterance.lang = 'pt-BR';
-            utterance.pitch = 1;
-            utterance.rate = 1;
-            
-            const voices = speechSynthesis.getVoices();
-            utterance.voice = voices[1]; // Escolher voz
+            if (isSpeaking) {
+                synth.cancel();
+                isSpeaking = false;
+            } else {
+                const utterance = new SpeechSynthesisUtterance(msg);
+                utterance.lang = 'pt-BR';
+                utterance.pitch = 1;
+                utterance.rate = 1;
+                
+                const voices = synth.getVoices();
+                utterance.voice = voices[1]; // Escolher voz
 
-            speechSynthesis.speak(utterance);
+                synth.speak(utterance);
+                isSpeaking = true;
+            }
         }
 
         // Função que adiciona a mensagem do usuário
@@ -48,21 +57,21 @@
         }
 
         // Função que adiciona a mensagem do bot
-        function addBotMessage(message) {
+        function addBotMessage() {
             var botMessageBlock = `
                 <div class="bot">
                     <div class="bot__container">
                         <img src="{{ url_for('static', filename='images/file.png') }}" alt="" class="bot__img">
                         <div class="bot__response">
                             <div class="bot__name">
-                                <p>LeviChatv1.0:</p>
+                                <p>LMChatv1.0:</p>
                             </div>
-                            <p class="bot__name__response">${message}</p>
+                            <p class="bot__name__response">Bot is typing...</p>
                             <div class="bot_options">
-                                <button>
-                                    <img src="../static/images/audio.png" onClick="speak("Oi")"/>
+                                <button class="audio-button">
+                                    <img src="../static/images/audio.png" />
                                 </button>
-                            </div>
+                            </div>  
                         </div>
                     </div>
                 </div>`;
@@ -72,14 +81,15 @@
 
         // Função que envia a mensagem e manipula a resposta do bot
         function sendMessage(message) {
-            addBotMessage('Bot is typing...');
+            addBotMessage();
             $.ajax({
                 type: 'POST',
                 url: '/chat',
                 data: { user_input: message },
                 success: function (response) {
                     $('.bot__name__response').last().text(response.response); // Atualiza a última resposta
-                    speak(response.response)
+                    const cleanedResponse = (response.response.trim()).replace(/['"]/g, '');
+                    $('.audio-button').last().attr("onClick", `speak('${cleanedResponse}')`);
                     scrollToBottom();
                 },
                 error: function () {

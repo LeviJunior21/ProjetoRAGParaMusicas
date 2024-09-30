@@ -1,7 +1,8 @@
 Jinja2
 jinja2-time
 flask
-SpeechRecognition pydub
+SpeechRecognition
+pydub
 pep8==1.7.1
 python-dateutil
 python-docx==0.8.11

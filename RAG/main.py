@@ -13,7 +13,7 @@ model = HuggingFaceEndpoint(
     task="text-generation",
     huggingfacehub_api_token=HF_API_TOKEN,
     temperature=0.1,
-    max_new_tokens=512,
+    max_new_tokens=2048,
     top_k=30,
     repetition_penalty=1.03,
 )
